@@ -1,10 +1,12 @@
-#[macro_use]
 extern crate reqwest;
 extern crate sha2;
 
+use sha2::{Digest, Sha256};
+
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::{Client, Url};
-use sha2::{Digest, Sha256};
+
+use std::{error, str};
 
 pub struct HttpClient {
     pub client: Client,
@@ -58,7 +60,7 @@ impl HttpClient {
 
     fn construct_headers(&self, path: &str) -> HeaderMap {
         let mut headers = HeaderMap::new();
-        let checksum = self.create_checksum(path);
+        let checksum = self.create_checksum::<Sha256>(path);
 
         headers.insert(
             HeaderName::from_static("x-request-checksum"),
@@ -67,18 +69,12 @@ impl HttpClient {
         headers
     }
 
-    // TODO: fix utf8 consumtption of hash
-    fn create_checksum<'a>(&self, path: &str) -> Box<String> {
-        let mut hasher = Sha256::new();
-        let input = format!("{}{}", self.token, path);
-
-        hasher.update(input);
-
-        Box::from(
-            hasher
-                .finalize()
-                .iter()
-                .fold(String::new(), |acc, i| acc + i.to_string().as_str()),
-        )
+    fn create_checksum<'a, D: Digest>(&self, path: &str) -> Box<String> {
+        let mut hasher = D::new();
+        let input = self.token.clone() + path;
+        hasher.update(input.as_bytes());
+        let mut buf: Vec<u8> = Vec::new();
+        buf.copy_from_slice(&hasher.finalize());
+        Box::from(String::from_utf8(buf).unwrap())
     }
 }
