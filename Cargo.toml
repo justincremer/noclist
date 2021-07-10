@@ -1,0 +1,16 @@
+[package]
+name = "noclist"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+sha2 = "0.9.5"
+reqwest = { version = "0.11.4", features = ["json"] }
+serde = "1.0.126"
+serde_json = "1.0.64"
+serde_derive = "1.0.126"
+tokio = "1.8.1"
+
+[[bin]]
+name = "noclist"
+path = "bin/main.rs"
