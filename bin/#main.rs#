@@ -1,0 +1,27 @@
+extern crate noclist;
+
+use noclist::{HttpClient, HttpResponse};
+
+#[tokio::main]
+async fn main() {
+    let mut client = HttpClient::new("http://0.0.0.0:8888");
+    client.auth().await.ensure_success();
+    let res: HttpResponse = client.get_users().await;
+    if (res.check_success()) {
+        println!("{}", res.unwrap().text());
+    }
+}
+
+     fn ensure_success(res:) {
+        match self {
+            Ok(_) => {}
+            Err(e) => eprintln!("{}", e),
+        }
+    }
+
+    fn check_success(&self) -> bool {
+        match self {
+            Ok(_) => true,
+            Err(_) => false,
+        }
+    }

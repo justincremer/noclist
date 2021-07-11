@@ -2,19 +2,18 @@ extern crate hex;
 extern crate reqwest;
 extern crate sha2;
 
-use hex::ToHex;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
-use reqwest::{Client, Url};
+use reqwest::{Client, Response, Url};
 use sha2::{Digest, Sha256};
-use std::str;
+use std::{error, str};
+
+pub type HttpResponse = Result<Response, Box<dyn error::Error>>;
 
 pub struct HttpClient {
     pub client: Client,
     pub base_url: String,
     pub token: String,
 }
-
-// type HttpResponse = Result<Response, reqwest::Error>;
 
 impl HttpClient {
     pub fn new(base_url: &str) -> Self {
@@ -25,31 +24,24 @@ impl HttpClient {
         }
     }
 
-    pub async fn get_users(&self) {
+    pub async fn get_users(&self) -> Result<Response, Box<dyn error::Error>> {
         let path = "/users";
         let url = Url::parse(&format!("{}{}", self.base_url, path)).unwrap();
         let headers = self.construct_headers(&path);
-
-        match self.client.get(url).headers(headers).send().await {
-            Ok(r) => println!("{:?}", r),
-            Err(e) => eprintln!("failed to fetch users, {}", e),
-        };
+        Ok(self.client.get(url).headers(headers).send().await?)
     }
 
-    pub async fn auth(&mut self) {
+    pub async fn auth(&mut self) -> Result<Response, Box<dyn error::Error>> {
         let url = Url::parse(&format!("{}{}", self.base_url, "/auth")).unwrap();
-        match self.client.get(url).send().await {
-            Ok(r) => {
-                self.token = r
-                    .headers()
-                    .get("badsec-authentication-token")
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string();
-            }
-            Err(e) => eprintln!("failed to authenticate, {}", e),
-        };
+        let res = self.client.get(url).send().await?;
+        self.token = res
+            .headers()
+            .get("badsec-authentication-token")
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string();
+        Ok(res)
     }
 
     fn construct_headers(&self, path: &str) -> HeaderMap {
