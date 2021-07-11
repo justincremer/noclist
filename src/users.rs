@@ -1,7 +1,8 @@
-use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Debug, Deserialize, Serialize)]
+use crate::http::HttpRespone;
+
+#[derive(Debug)]
 pub struct Users {
     inner: Vec<String>,
 }
@@ -12,11 +13,23 @@ impl Users {
             Some(i) => i,
             None => Vec::new(),
         };
+
         Users { inner }
     }
 
-    pub fn count(&self) -> usize {
-        self.inner.len()
+    pub async fn populate_from_response(&mut self, i: HttpRespone) -> Result<(), ()> {
+        match i {
+            Ok(r) => match r.text().await {
+                Ok(text) => {
+                    *self = Users::from(text);
+                    return Ok(());
+                }
+                Err(e) => eprintln!("{}", e),
+            },
+            Err(e) => eprintln!("{}", e),
+        }
+
+        Err(())
     }
 }
 

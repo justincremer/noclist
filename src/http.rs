@@ -2,12 +2,12 @@ use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::Response;
 use reqwest::{Client, Url};
 
-use std::error;
+use std::error::Error;
 use std::str;
 
 use crate::crypt;
 
-pub type HttpRespone = Result<Response, Box<dyn error::Error>>;
+pub type HttpRespone = Result<Response, Box<dyn Error>>;
 
 pub fn ensure_success(res: &HttpRespone) {
     match res {
@@ -43,22 +43,27 @@ impl HttpClient {
         let path = "/users";
         let url = Url::parse(&format!("{}{}", self.base_url, path)).unwrap();
         let headers = self.construct_headers(&path);
-        let res = self.client.get(url).headers(headers).send().await?;
-
-        Ok(res)
+        match self.client.get(url).headers(headers).send().await {
+            Ok(r) => Ok(r),
+            Err(e) => Err(Box::new(e)),
+        }
     }
 
     pub async fn auth(&mut self) -> HttpRespone {
         let url = Url::parse(&format!("{}{}", self.base_url, "/auth")).unwrap();
-        let res = self.client.get(url).send().await?;
-        self.token = res
-            .headers()
-            .get("badsec-authentication-token")
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string();
-        Ok(res)
+        match self.client.get(url).send().await {
+            Ok(r) => {
+                self.token = r
+                    .headers()
+                    .get("badsec-authentication-token")
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_string();
+                Ok(r)
+            }
+            Err(e) => Err(Box::new(e)),
+        }
     }
 
     fn construct_headers(&self, path: &str) -> HeaderMap {
