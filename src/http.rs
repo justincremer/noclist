@@ -1,11 +1,11 @@
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
+use reqwest::Response;
 use reqwest::{Client, Url};
 
-use crate::crypt;
+use std::error;
 use std::str;
 
-use reqwest::Response;
-use std::error;
+use crate::crypt;
 
 pub type HttpRespone = Result<Response, Box<dyn error::Error>>;
 

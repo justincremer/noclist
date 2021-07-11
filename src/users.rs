@@ -1,8 +1,6 @@
-use serde::Deserialize;
-
 use std::fmt;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug)]
 pub struct Users {
     inner: Vec<String>,
 }
