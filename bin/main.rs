@@ -1,34 +1,25 @@
 extern crate noclist;
 
-use std::ascii::AsciiExt;
+use serde_json;
 
-use hex;
-use noclist::{HttpClient, HttpResponse};
+use noclist::http::{ensure_success, HttpClient};
+use noclist::users::Users;
 
 #[tokio::main]
 async fn main() {
     let mut client = HttpClient::new("http://0.0.0.0:8888");
-    ensure_success(&client.auth().await);
-    let res: HttpResponse = client.get_users().await;
+    let res = client.auth().await;
+    ensure_success(&res);
+    let res = client.get_users().await;
+    let mut users: Users = Default::default();
+
     match res {
         Ok(r) => match r.text().await {
-            Ok(text) => println!("{}", text),
+            Ok(text) => users = Users::from(text),
             Err(e) => eprintln!("{}", e),
         },
         Err(e) => eprintln!("{}", e),
     }
-}
 
-fn ensure_success(res: &HttpResponse) {
-    match res {
-        Ok(_) => {}
-        Err(e) => eprintln!("{}", e),
-    }
-}
-
-fn check_success(res: &HttpResponse) -> bool {
-    match res {
-        Ok(_) => true,
-        Err(_) => false,
-    }
+    println!("{}\nThere are {} users", users, users.count());
 }
