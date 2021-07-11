@@ -28,7 +28,8 @@ impl HttpClient {
         let path = "/users";
         let url = Url::parse(&format!("{}{}", self.base_url, path)).unwrap();
         let headers = self.construct_headers(&path);
-        Ok(self.client.get(url).headers(headers).send().await?)
+        let res = self.client.get(url).headers(headers).send().await?;
+        Ok(res)
     }
 
     pub async fn auth(&mut self) -> Result<Response, Box<dyn error::Error>> {
