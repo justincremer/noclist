@@ -20,5 +20,5 @@ async fn main() {
         Err(e) => eprintln!("{}", e),
     }
 
-    println!("{}\nThere are {} users", users, users.count());
+    println!("{}", users);
 }

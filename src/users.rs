@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Users {
     inner: Vec<String>,
 }
@@ -11,7 +12,6 @@ impl Users {
             Some(i) => i,
             None => Vec::new(),
         };
-
         Users { inner }
     }
 
@@ -39,10 +39,6 @@ impl From<String> for Users {
 
 impl fmt::Display for Users {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let msg = self
-            .inner
-            .iter()
-            .fold(String::new(), |acc, u| acc + u + "\n");
-        write!(f, "{}", msg)
+        write!(f, "{}", serde_json::to_string(&self.inner).unwrap())
     }
 }
