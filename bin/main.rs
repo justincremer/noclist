@@ -44,13 +44,10 @@ async fn main() {
         }
     }
 
-    match success {
-        true => {
-            println!("{}", users);
-            exit(0);
-        }
-        false => {
-            exit(1);
-        }
+    if success {
+        println!("{}", users);
+        exit(0);
     };
+
+    exit(1);
 }
