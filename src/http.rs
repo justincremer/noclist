@@ -27,7 +27,7 @@ pub fn check_success(res: &HttpRespone) -> bool {
 pub struct HttpClient {
     pub client: Client,
     pub base_url: String,
-    pub token: String,
+    token: String,
 }
 
 impl HttpClient {
