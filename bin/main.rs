@@ -49,5 +49,6 @@ async fn main() {
         exit(0);
     };
 
+    eprintln!("failed to retrieve user ids");
     exit(1);
 }
