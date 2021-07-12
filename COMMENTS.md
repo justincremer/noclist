@@ -25,3 +25,5 @@ Run unit tests
 ``` sh
 cargo test
 ```
+
+I have provided two scripts, on for starting the docker container and another for checking the exit code of our program.
