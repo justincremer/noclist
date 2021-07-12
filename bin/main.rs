@@ -13,7 +13,9 @@ async fn main() {
     // Authenticate client
     ensure_success(&client.auth().await);
 
-    // Fetch users, retrying 3 times, and smoothly exiting
+    // Fetch users, attempting 3 times, and smoothly exiting.
+    // I would normally write this generically and recursively,
+    // but there is no need for a simple appliction such as this.
     let mut acc = 0;
     while acc < 3 {
         let res = client.get_users().await;
